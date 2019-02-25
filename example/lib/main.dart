@@ -7,7 +7,7 @@ import 'package:image_crop/image_crop.dart';
 
 // Hidden import to let `flutter packages pub publish --dry-run` complete without errors
 // FIXME: uncomment to try out example code
-// import 'package:image_picker/image_picker.dart';
+ import 'package:image_picker/image_picker.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
