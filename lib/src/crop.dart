@@ -88,10 +88,10 @@ class CropState extends State<Crop> with TickerProviderStateMixin, Drag {
     return _view.isEmpty
         ? null
         : Rect.fromLTRB(
-            _view.left,
-            _view.top,
-            _view.left + _view.width * _area.width / _scale,
-            _view.top + _view.height * _area.height / _scale,
+            _area.left,
+            _area.top,
+            _area.left + _view.width * _area.width / _scale,
+            _area.top + _view.height * _area.height / _scale,
           );
   }
 
@@ -545,8 +545,8 @@ class _CropPainter extends CustomPainter {
         image.height.toDouble(),
       );
       final dst = Rect.fromLTWH(
-        rect.width * area.left - image.width * view.left * scale * ratio,
-        rect.height * area.top - image.height * view.top * scale * ratio,
+        0.0,
+        0.0,
         image.width * scale * ratio,
         image.height * scale * ratio,
       );
