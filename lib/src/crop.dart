@@ -569,34 +569,107 @@ class _CropPainter extends CustomPainter {
       rect.width * area.width,
       rect.height * area.height,
     );
-    canvas.drawRect(Rect.fromLTRB(0.0, 0.0, rect.width, boundaries.top), paint);
-    canvas.drawRect(
-        Rect.fromLTRB(0.0, boundaries.bottom, rect.width, rect.height), paint);
-    canvas.drawRect(
-        Rect.fromLTRB(0.0, boundaries.top, boundaries.left, boundaries.bottom),
-        paint);
-    canvas.drawRect(
-        Rect.fromLTRB(
-            boundaries.right, boundaries.top, rect.width, boundaries.bottom),
-        paint);
+    final List<Point> cropArea = [
+      Point(rect.width * area.left, rect.height * area.top),
+      Point(rect.width * area.left + rect.width * area.width,
+          rect.height * area.top),
+      Point(rect.width * area.left + rect.width * area.width,
+          rect.height * area.top + rect.height * area.height),
+      Point(rect.width * area.left,
+          rect.height * area.top + rect.height * area.height),
+    ];
+
+    Path outArea = new Path();
+    outArea.addPolygon([
+      Offset(0, 0),
+      Offset(0, (image?.height?.toDouble() ?? 0) * scale * ratio),
+      Offset(cropArea[3].x, cropArea[3].y),
+      Offset(cropArea[0].x, cropArea[0].y),
+    ], true);
+
+    outArea.addPolygon([
+      Offset(0, 0),
+      Offset((image?.width?.toDouble() ?? 0) * scale * ratio, 0),
+      Offset(cropArea[1].x, cropArea[1].y),
+      Offset(cropArea[0].x, cropArea[0].y),
+    ], true);
+
+    outArea.addPolygon([
+      Offset(cropArea[1].x, cropArea[1].y),
+      Offset((image?.width?.toDouble() ?? 0) * scale * ratio, 0),
+      Offset((image?.width?.toDouble() ?? 0) * scale * ratio,
+          (image?.height?.toDouble() ?? 0) * scale * ratio),
+      Offset(cropArea[2].x, cropArea[2].y),
+    ], true);
+
+    outArea.addPolygon([
+      Offset(cropArea[3].x, cropArea[3].y),
+      Offset(cropArea[2].x, cropArea[2].y),
+      Offset((image?.width?.toDouble() ?? 0) * scale * ratio,
+          (image?.height?.toDouble() ?? 0) * scale * ratio),
+      Offset(0, (image?.height?.toDouble() ?? 0) * scale * ratio),
+    ], true);
+
+    paint.style = PaintingStyle.fill;
+    canvas.drawPath(outArea, paint);
+
+//    paint.style = PaintingStyle.stroke;
+//    paint.strokeWidth = 10.0;
+//    paint.strokeJoin = StrokeJoin.round;
+//    paint.color = Color.fromRGBO(150, 150, 150, 1.0);
+//    canvas.drawPath(outArea, paint);
+
+//    paint
+////      ..color = Colors.black
+////      ..style = PaintingStyle.stroke
+//      ..strokeWidth = 10.0;
+//    paint.style = PaintingStyle.fill;
+//    paint.strokeJoin = StrokeJoin.round;
+
+//    //Shadow out of boundaries
+//    canvas.drawPoints(
+//        ui.PointMode.polygon,
+//        [
+//          Offset(topLeft.x, topLeft.y),
+//          Offset(topRight.x, topRight.y),
+//          Offset(bottomRight.x, bottomRight.y),
+//          Offset(bottomLeft.x, bottomLeft.y),
+//          Offset(topLeft.x, topLeft.y),
+//        ],
+//        paint);
+//    canvas.drawLine(Offset(topLeft.x, topLeft.y), Offset(topRight.x, topRight.y), paint);
+//    canvas.drawRect(Rect.fromLTRB(0.0, boundaries.bottom, rect.width, rect.height), paint);
+//    canvas.drawRect(Rect.fromLTRB(0.0, boundaries.top, boundaries.left, boundaries.bottom), paint);
+//    canvas.drawRect(Rect.fromLTRB(boundaries.right, boundaries.top, rect.width, boundaries.bottom), paint);
 
     if (!boundaries.isEmpty) {
       _drawGrid(canvas, boundaries);
-      _drawHandles(canvas, boundaries);
+      _drawHandles(canvas, cropArea);
     }
 
     canvas.restore();
   }
 
-  void _drawHandles(Canvas canvas, Rect boundaries) {
+  void _drawHandles(Canvas canvas, List<Point> cropArea) {
     final paint = Paint()
       ..isAntiAlias = true
       ..color = _kCropHandleColor;
 
     canvas.drawOval(
       Rect.fromLTWH(
-        boundaries.left - _kCropHandleSize / 2,
-        boundaries.top - _kCropHandleSize / 2,
+        cropArea[0].x - _kCropHandleSize / 2,
+        cropArea[0].y - _kCropHandleSize / 2,
+        _kCropHandleSize,
+        _kCropHandleSize,
+      ),
+      paint,
+    );
+
+//Draw oval pointers to corners
+    canvas.drawOval(
+      Rect.fromLTWH(
+        cropArea[1].x - _kCropHandleSize / 2,
+        cropArea[1].y - _kCropHandleSize / 2,
         _kCropHandleSize,
         _kCropHandleSize,
       ),
@@ -605,8 +678,8 @@ class _CropPainter extends CustomPainter {
 
     canvas.drawOval(
       Rect.fromLTWH(
-        boundaries.right - _kCropHandleSize / 2,
-        boundaries.top - _kCropHandleSize / 2,
+        cropArea[2].x - _kCropHandleSize / 2,
+        cropArea[2].y - _kCropHandleSize / 2,
         _kCropHandleSize,
         _kCropHandleSize,
       ),
@@ -615,18 +688,8 @@ class _CropPainter extends CustomPainter {
 
     canvas.drawOval(
       Rect.fromLTWH(
-        boundaries.right - _kCropHandleSize / 2,
-        boundaries.bottom - _kCropHandleSize / 2,
-        _kCropHandleSize,
-        _kCropHandleSize,
-      ),
-      paint,
-    );
-
-    canvas.drawOval(
-      Rect.fromLTWH(
-        boundaries.left - _kCropHandleSize / 2,
-        boundaries.bottom - _kCropHandleSize / 2,
+        cropArea[3].x - _kCropHandleSize / 2,
+        cropArea[3].y - _kCropHandleSize / 2,
         _kCropHandleSize,
         _kCropHandleSize,
       ),
